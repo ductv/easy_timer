@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Minuteur</string>
+    <string name="pick_alarm_time">Régler l\'heure de l\'alarme</string>
+</resources>

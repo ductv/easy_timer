@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Temporizador</string>
+    <string name="pick_alarm_time">Seleccionar hora de alarma</string>
+</resources>

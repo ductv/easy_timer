@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">EasyTimer</string>
+    <string name="pick_alarm_time">Set alarm time</string>
 </resources>

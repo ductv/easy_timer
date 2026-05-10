@@ -18,6 +18,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import com.ducta.easytimer.R
 import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -37,7 +39,7 @@ fun AlarmScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Button(onClick = { showTimePicker = true }) {
-            Text("Chọn giờ báo thức")
+            Text(text= stringResource(id=R.string.pick_alarm_time))
         }
 
         if (showTimePicker) {
