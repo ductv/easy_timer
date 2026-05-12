@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">Minuteur</string>
     <string name="pick_alarm_time">Régler l\'heure de l\'alarme</string>
+    <string name="alarm_is_ringing">L\'alarme sonne !</string>
+    <string name="tap_to_stop">Toucher pour arrêter</string>
+    <string name="set_alarm_time">Choisir l\'heure de l\'alarme</string>
+    <string name="alarm">Réveil!</string>
+    <string name="time_for_wake_up">C\'est l\'heure du rendez-vous, réveille-toi !</string>
 </resources>

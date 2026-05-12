@@ -9,7 +9,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimeInput
-import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -80,7 +79,7 @@ fun TimePickerDialog(
         onDismissRequest = onDismissRequest,
         confirmButton = confirmButton,
         dismissButton = dismissButton,
-        title = { Text(text = "Chọn giờ báo thức") }, // Giải quyết lỗi "No value passed for parameter 'title'"
+        title = { Text(text = stringResource(id = R.string.set_alarm_time)) }, // Giải quyết lỗi "No value passed for parameter 'title'"
         text = { content() }
     )
 }

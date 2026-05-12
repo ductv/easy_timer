@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">EasyTimer</string>
     <string name="pick_alarm_time">Set alarm time</string>
+    <string name="alarm_is_ringing">The alarm is ringing!</string>
+    <string name="tap_to_stop">Tap to stop alarm</string>
+    <string name="set_alarm_time">Set alarm time</string>
+    <string name="alarm">Alarm!</string>
+    <string name="time_for_wake_up">It\'s time for our appointment, wake up!</string>
 </resources>

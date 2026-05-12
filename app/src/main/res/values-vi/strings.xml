@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">Hẹn giờ nhanh</string>
     <string name="pick_alarm_time">Chọn giờ báo thức</string>
+    <string name="alarm_is_ringing">BÁO THỨC ĐANG REO!</string>
+    <string name="tap_to_stop">CHẠM ĐỂ DỪNG BÁO THỨC</string>
+    <string name="set_alarm_time">Chọn giờ báo thức</string>
+    <string name="alarm">Báo thức!</string>
+    <string name="time_for_wake_up">Đã đến giờ hẹn rồi, dậy thôi!</string>
 </resources>

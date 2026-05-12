@@ -3,7 +3,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.ducta.easytimer.R
 
 @Composable
 fun AlarmScreen(onStopClick: () -> Unit) {
@@ -13,12 +15,12 @@ fun AlarmScreen(onStopClick: () -> Unit) {
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = "BÁO THỨC ĐANG REO!",
+                text = stringResource(id = R.string.alarm_is_ringing),
                 style = MaterialTheme.typography.headlineLarge
             )
             Spacer(modifier = Modifier.height(32.dp))
             Button(onClick = onStopClick) {
-                Text("CHẠM ĐỂ DỪNG BÁO THỨC")
+                Text(stringResource(id = R.string.tap_to_stop))
             }
         }
     }

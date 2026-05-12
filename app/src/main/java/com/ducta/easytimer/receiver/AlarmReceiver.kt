@@ -10,6 +10,7 @@ import android.media.RingtoneManager
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.ducta.easytimer.AlarmMusicPlayer
+import com.ducta.easytimer.R
 import com.ducta.easytimer.activity.AlarmActivity
 
 class AlarmReceiver : BroadcastReceiver() {
@@ -39,8 +40,8 @@ class AlarmReceiver : BroadcastReceiver() {
 
         val notification = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-            .setContentTitle("Báo thức!")
-            .setContentText("Đã đến giờ hẹn rồi, dậy thôi!")
+            .setContentTitle(context.getString(R.string.alarm))
+            .setContentText(context.getString(R.string.time_for_wake_up))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setFullScreenIntent(fullScreenPendingIntent, true)

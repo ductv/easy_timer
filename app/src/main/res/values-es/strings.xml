@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">Temporizador</string>
     <string name="pick_alarm_time">Seleccionar hora de alarma</string>
+    <string name="alarm_is_ringing">¡La alarma está sonando!</string>
+    <string name="tap_to_stop">Pulsar para detener</string>
+    <string name="set_alarm_time">Seleccionar hora</string>
+    <string name="alarm">Despertador!</string>
+    <string name="time_for_wake_up">¡Es hora de la cita, despierta!</string>
 </resources>
