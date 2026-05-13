@@ -20,22 +20,21 @@ import androidx.compose.ui.Modifier
 import com.ducta.easytimer.receiver.AlarmReceiver
 import com.ducta.easytimer.ui.screens.AlarmScreen
 import com.ducta.easytimer.ui.theme.EasyTimerTheme
+import java.util.Calendar
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        createNotificationChannel(this) // Đảm bảo đã tạo channel
+        createNotificationChannel(this)
         setContent {
             EasyTimerTheme {
-                // Scaffold cung cấp cấu trúc chuẩn (thanh tiêu đề, nút bấm nổi...)
-                Scaffold(modifier = Modifier.Companion.fillMaxSize()) { innerPadding ->
-                    // Gọi màn hình chính của bạn tại đây
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     AlarmScreen(
-                        modifier = Modifier.Companion.padding(innerPadding),
-                        onSetAlarm = { timeInMillis ->
-                            // Gọi hàm đặt báo thức trong MainActivity
-                            scheduleAlarm(this@MainActivity, timeInMillis)
+                        modifier = Modifier.padding(innerPadding),
+                        onSetAlarm = { hour, minute, selectedDays ->
+                            // Nhận dữ liệu dạng Int, Int, List<Int> từ AlarmScreen
+                            scheduleAlarm(this@MainActivity, hour, minute, selectedDays)
                         }
                     )
                 }
@@ -45,56 +44,89 @@ class MainActivity : ComponentActivity() {
 
     private fun createNotificationChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = "Alarm Channel"
-            val descriptionText = "Kênh dùng cho thông báo báo thức"
-            val importance = NotificationManager.IMPORTANCE_HIGH
-            val channel = NotificationChannel("alarm_channel", name, importance).apply {
-                description = descriptionText
-                // Cho phép rung và âm thanh mặc định ở cấp độ hệ thống
+            val channel = NotificationChannel(
+                "alarm_channel", "Alarm Channel", NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "Kênh dùng cho thông báo báo thức"
                 enableVibration(true)
             }
-
-            val notificationManager: NotificationManager =
-                context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
+            (context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager)
+                .createNotificationChannel(channel)
         }
     }
 
-    @SuppressLint("ServiceCast", "ScheduleExactAlarm")
-    private fun scheduleAlarm(context: Context, triggerTime: Long) {
+    @SuppressLint("ScheduleExactAlarm")
+    private fun scheduleAlarm(context: Context, hour: Int, minute: Int, selectedDays: List<Int>) {
         val alarmManager = context.getSystemService(ALARM_SERVICE) as AlarmManager
-        val intent = Intent(context, AlarmReceiver::class.java)
 
-        val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            0,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
+        // 1. Nếu không chọn ngày nào -> Đặt báo thức 1 lần vào khung giờ gần nhất
+        if (selectedDays.isEmpty()) {
+            val triggerTime = calculateNextTriggerTime(hour, minute, -1)
+            val intent = Intent(context, AlarmReceiver::class.java)
+            val pendingIntent = PendingIntent.getBroadcast(
+                context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent)
+            Toast.makeText(context, formatTimeRemaining(triggerTime), Toast.LENGTH_LONG).show()
+            return
+        }
 
-        alarmManager.setExactAndAllowWhileIdle(
-            AlarmManager.RTC_WAKEUP,
-            triggerTime,
-            pendingIntent
-        )
+        // 2. Nếu chọn lặp lại theo ngày -> Đặt lịch riêng cho từng ngày bằng requestCode khác nhau
+        var earliestTrigger = Long.MAX_VALUE
+        for (dayOfWeek in selectedDays) {
+            val triggerTime = calculateNextTriggerTime(hour, minute, dayOfWeek)
+            if (triggerTime < earliestTrigger) earliestTrigger = triggerTime
 
-        // Lấy chuỗi thông báo thời gian còn lại
-        val timeRemaining = formatTimeRemaining(triggerTime)
+            val intent = Intent(context, AlarmReceiver::class.java).apply {
+                putExtra("ALARM_HOUR", hour)
+                putExtra("ALARM_MINUTE", minute)
+                putExtra("DAY_OF_WEEK", dayOfWeek) // Truyền đi để AlarmReceiver tự đặt lại lịch tuần sau
+            }
 
-        // Hiển thị thông báo cho người dùng
-        Toast.makeText(context, timeRemaining, Toast.LENGTH_LONG).show()
+            // Dùng dayOfWeek (1->7) làm requestCode giúp các ngày không ghi đè cấu hình của nhau
+            val pendingIntent = PendingIntent.getBroadcast(
+                context, dayOfWeek, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent)
+        }
+
+        Toast.makeText(context, "Báo thức gần nhất: " + formatTimeRemaining(earliestTrigger), Toast.LENGTH_LONG).show()
+    }
+
+    private fun calculateNextTriggerTime(hour: Int, minute: Int, dayOfWeek: Int): Long {
+        val calendar = Calendar.getInstance().apply {
+            timeInMillis = System.currentTimeMillis()
+            set(Calendar.HOUR_OF_DAY, hour)
+            set(Calendar.MINUTE, minute)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+
+        if (dayOfWeek != -1) {
+            val currentDay = calendar.get(Calendar.DAY_OF_WEEK)
+            var daysUntil = dayOfWeek - currentDay
+            if (daysUntil < 0 || (daysUntil == 0 && calendar.timeInMillis <= System.currentTimeMillis())) {
+                daysUntil += 7
+            }
+            calendar.add(Calendar.DAY_OF_YEAR, daysUntil)
+        } else if (calendar.timeInMillis <= System.currentTimeMillis()) {
+            calendar.add(Calendar.DAY_OF_YEAR, 1)
+        }
+        return calendar.timeInMillis
     }
 
     private fun formatTimeRemaining(triggerTime: Long): String {
         val diff = triggerTime - System.currentTimeMillis()
         if (diff <= 0) return "Báo thức ngay bây giờ"
-
-        val hours = diff / (1000 * 60 * 60)
-        val minutes = (diff / (1000 * 60)) % 60
-
-        return when {
-            hours > 0 -> "Báo thức sau $hours giờ $minutes phút"
-            else -> "Báo thức sau $minutes phút"
+        val days = java.util.concurrent.TimeUnit.MILLISECONDS.toDays(diff)
+        val hours = java.util.concurrent.TimeUnit.MILLISECONDS.toHours(diff) % 24
+        val minutes = java.util.concurrent.TimeUnit.MILLISECONDS.toMinutes(diff) % 60
+        return buildString {
+            append("Báo thức sau ")
+            if (days > 0) append("$days ngày ")
+            if (hours > 0) append("$hours giờ ")
+            append("$minutes phút")
         }
     }
 }
